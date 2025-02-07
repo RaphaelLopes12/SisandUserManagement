@@ -32,8 +32,23 @@ public class AuthController : ControllerBase
     [SwaggerResponse(400, "Erro ao cadastrar o usuário.")]
     public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
     {
-        var user = await _authService.RegisterAsync(request.Name, request.Email, request.Password, request.Role);
-        return Ok(new { user.Id, user.Name, user.Email });
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                          .Select(e => e.ErrorMessage)
+                                          .ToList();
+            return BadRequest(new { message = "Erro de validação.", errors });
+        }
+
+        try
+        {
+            var user = await _authService.RegisterAsync(request.Name, request.Email, request.Password, request.Role);
+            return Ok(new { user.Id, user.Name, user.Email, user.Role });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>

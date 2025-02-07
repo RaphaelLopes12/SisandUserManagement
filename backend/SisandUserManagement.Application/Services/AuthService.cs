@@ -23,6 +23,12 @@ namespace SisandUserManagement.Application.Services
 
         public async Task<User> RegisterAsync(string name, string email, string password, string role = "User")
         {
+            var existingUser = await _userRepository.GetByEmailAsync(email);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Este e-mail já está em uso.");
+            }
+
             var hashedPassword = BCryptNet.HashPassword(password);
             var user = new User
             {
