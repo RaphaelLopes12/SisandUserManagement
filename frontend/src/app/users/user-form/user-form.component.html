@@ -1,0 +1,45 @@
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true" *ngIf="loading">
+    <p style="color: white">Carregando...</p>
+  </ngx-spinner>
+  
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="text-primary">{{ isEditing ? 'Editar Usuário' : 'Criar Usuário' }}</h2>
+    </div>
+  
+    <div class="card shadow">
+      <div class="card-body">
+        <form [formGroup]="userForm" (ngSubmit)="saveUser()">
+          <div class="mb-3">
+            <label for="name" class="form-label">Nome</label>
+            <input type="text" id="name" class="form-control" formControlName="name" placeholder="Digite o nome" />
+            <div *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched" class="text-danger">
+              Nome é obrigatório
+            </div>
+          </div>
+  
+          <div class="mb-3">
+            <label for="email" class="form-label">E-mail</label>
+            <input type="email" id="email" class="form-control" formControlName="email" placeholder="Digite o e-mail" />
+            <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="text-danger">
+              E-mail válido é obrigatório
+            </div>
+          </div>
+  
+          <div class="mb-3">
+            <label for="password" class="form-label">Senha</label>
+            <input type="password" id="password" class="form-control" formControlName="password" placeholder="Digite a senha" />
+            <div *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" class="text-danger">
+              Senha é obrigatória
+            </div>
+          </div>
+  
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-secondary me-2" (click)="cancel()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  

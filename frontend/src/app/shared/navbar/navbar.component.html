@@ -1,0 +1,9 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <span class="navbar-text text-white">
+        Bem-vindo, {{ user?.name || 'Usuário' }}
+      </span>
+      <button class="btn btn-danger ms-auto" (click)="logout()">Sair</button>
+    </div>
+  </nav>
+  

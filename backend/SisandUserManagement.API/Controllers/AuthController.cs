@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SisandUserManagement.API.DTOs;
 using SisandUserManagement.Application.Interfaces.Services;
 
@@ -17,7 +16,6 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
     {
         var user = await _authService.RegisterAsync(request.Name, request.Email, request.Password, request.Role);
