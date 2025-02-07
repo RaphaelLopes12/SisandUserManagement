@@ -61,6 +61,7 @@ export class UserFormComponent implements OnInit {
     if (this.userForm.invalid) return;
   
     const userData = this.userForm.value;
+    this.loading = true;
   
     if (this.isEditing) {
       this.userService.updateUser(this.userId!, userData).subscribe({
@@ -68,7 +69,12 @@ export class UserFormComponent implements OnInit {
           this.toastService.success('Usuário atualizado com sucesso!');
           this.router.navigate(['/users']);
         },
-        error: () => this.toastService.error('Erro ao atualizar usuário')
+        error: (error) => {
+          this.handleError(error);
+        },
+        complete: () => {
+          this.loading = false;
+        }
       });
     } else {
       this.authService.register(userData).subscribe({
@@ -76,9 +82,36 @@ export class UserFormComponent implements OnInit {
           this.toastService.success('Usuário registrado com sucesso!');
           this.router.navigate(['/login'], { queryParams: { fromRegister: 'true' } });
         },
-        error: () => this.toastService.error('Erro ao criar usuário')
+        error: (error) => {
+          this.handleError(error);
+        },
+        complete: () => {
+          this.loading = false;
+        }
       });
     }
+  }
+  
+  private handleError(error: any): void {
+    this.loading = false;
+  
+    if (error.status === 400) {
+      const validationErrors = error.error.errors;
+      
+      if (validationErrors) {
+        Object.values(validationErrors).forEach((messages: any) => {
+          messages.forEach((msg: string) => this.toastService.error(msg));
+        });
+        return;
+      }
+    }
+  
+    if (error.error?.message) {
+      this.toastService.error(error.error.message);
+      return;
+    }
+  
+    this.toastService.error('Ocorreu um erro ao processar sua solicitação.');
   }  
 
   cancel(): void {
