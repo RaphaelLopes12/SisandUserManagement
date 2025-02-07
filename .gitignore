@@ -1,0 +1,15 @@
+bin/
+obj/
+*.user
+*.vs
+.vs/
+.vscode/
+.idea/
+*.suo
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+*.db
+migrations/
