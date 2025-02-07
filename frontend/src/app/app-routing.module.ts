@@ -8,9 +8,9 @@ import { ProfileComponent } from './users/profile/profile.component';
 
 const routes: Routes = [
   { path: '', component: LoginComponent },
-  { path: 'profile', component: ProfileComponent },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'users', component: UserListComponent, canActivate: [AuthGuard] },
-  { path: 'users/new', component: UserFormComponent, canActivate: [AuthGuard] },
+  { path: 'users/new', component: UserFormComponent },
   { path: 'users/edit/:id', component: UserFormComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '' }
 ];

@@ -21,6 +21,12 @@ export class LoginComponent {
     private spinner: NgxSpinnerService
   ) {}
 
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/profile']);
+    }
+  }
+
   login(): void {
     this.loading = true;
     this.spinner.show();
@@ -51,5 +57,9 @@ export class LoginComponent {
         this.loading = false;
       }
     });
+  }
+
+  navigateToRegister(): void {
+    this.router.navigate(['/users/new']);
   }
 }

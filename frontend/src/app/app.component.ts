@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { AuthService } from './auth/auth.service';
+import { Router, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -7,9 +8,13 @@ import { Router } from '@angular/router';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  constructor(private router: Router) {}
+  showNavbar = false;
 
-  shouldShowNavbar(): boolean {
-    return !(this.router.url === '/' || this.router.url.includes('/login'));
+  constructor(private authService: AuthService, private router: Router) {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.showNavbar = this.authService.isAuthenticated();
+      }
+    });
   }
 }

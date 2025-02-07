@@ -14,6 +14,7 @@ export class UserFormComponent implements OnInit {
   userId: string | null = null;
   isEditing = false;
   loading = false;
+  hideNavbar = false;
 
   constructor(
     private fb: FormBuilder,
@@ -30,10 +31,14 @@ export class UserFormComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  ngOnInit(): void {  
     this.userId = this.route.snapshot.paramMap.get('id');
     this.isEditing = !!this.userId;
   
+    this.route.queryParams.subscribe((params) => {
+      this.hideNavbar = params['fromLogin'] === 'true';
+    });
+
     if (this.isEditing) {
       this.loading = true;
       this.userService.getUserById(this.userId!).subscribe({
@@ -54,9 +59,9 @@ export class UserFormComponent implements OnInit {
 
   saveUser(): void {
     if (this.userForm.invalid) return;
-
+  
     const userData = this.userForm.value;
-
+  
     if (this.isEditing) {
       this.userService.updateUser(this.userId!, userData).subscribe({
         next: () => {
@@ -68,13 +73,13 @@ export class UserFormComponent implements OnInit {
     } else {
       this.authService.register(userData).subscribe({
         next: () => {
-          this.toastService.success('Usuário criado com sucesso!');
-          this.router.navigate(['/users']);
+          this.toastService.success('Usuário registrado com sucesso!');
+          this.router.navigate(['/login'], { queryParams: { fromRegister: 'true' } });
         },
         error: () => this.toastService.error('Erro ao criar usuário')
       });
     }
-  }
+  }  
 
   cancel(): void {
     this.router.navigate(['/users']);
