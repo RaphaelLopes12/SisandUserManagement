@@ -19,7 +19,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Configuração do JWT
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -41,11 +40,29 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "SisandUserManagement API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "SisandUserManagement API",
+        Version = "v1",
+        Description = "API para gerenciamento de usuários com autenticação JWT",
+        Contact = new OpenApiContact
+        {
+            Name = "Raphael Ferreira Lopes",
+            Email = "raphaellopes228@gmail.com",
+            Url = new Uri("https://github.com/RaphaelLopes12")
+        },
+        License = new OpenApiLicense
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/licenses/MIT")
+        }
+    });
+
+    c.EnableAnnotations();
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Insira o token JWT desta forma: {seu_token_aqui}",
+        Description = "Insira o token JWT no formato: Bearer {seu_token_aqui}",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
@@ -76,7 +93,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(x => x.AllowAnyHeader()
+app.UseCors(x=>x.AllowAnyHeader()
                  .AllowAnyMethod()
                  .AllowAnyOrigin());
 
