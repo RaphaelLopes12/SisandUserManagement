@@ -25,6 +25,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.Username).IsUnique();
 
         builder.Property(u => u.Address)
+            .IsRequired(false)
             .HasMaxLength(200);
 
         builder.Property(u => u.BirthDate)

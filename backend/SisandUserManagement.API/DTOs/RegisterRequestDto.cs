@@ -26,8 +26,6 @@ public class RegisterRequestDto
     [BirthDateValidation(ErrorMessage = "A data de nascimento não pode ser maior que hoje.")]
     public DateTime BirthDate { get; set; }
 
-    [Required(ErrorMessage = "O telefone é obrigatório.")]
-    [Phone(ErrorMessage = "Número de telefone inválido.")]
     [StringLength(20, ErrorMessage = "O telefone deve ter no máximo 20 caracteres.")]
     public string PhoneNumber { get; set; } = string.Empty;
 
