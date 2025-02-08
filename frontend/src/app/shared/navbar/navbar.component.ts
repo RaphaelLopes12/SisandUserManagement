@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
   user: any = null;
 
   constructor(private router: Router) {}
@@ -15,14 +15,22 @@ export class NavbarComponent {
     this.loadUser();
   }
 
+  /**
+   * Carrega os dados do usuário salvo no localStorage
+   */
   loadUser(): void {
     const storedUser = localStorage.getItem('user');
     this.user = storedUser ? JSON.parse(storedUser) : null;
   }
 
+  /**
+   * Realiza logout do usuário
+   */
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login']).then(() => {
+      window.location.reload(); // Atualiza a página para garantir que os dados sumam
+    });
   }
 }
