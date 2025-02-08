@@ -85,7 +85,7 @@ dotnet ef database update
 dotnet run
 ```
 
-A API ficará disponível em `http://localhost:5000`.
+A API ficará disponível em `http://localhost:5276`.
 
 ### **🌐 3. Rodando o Frontend**
 
@@ -140,7 +140,7 @@ Isso criará os containers do backend, frontend e banco de dados automaticamente
 ## 📄 **Estrutura do Repositório**
 
 ```sh
-/sisand-cadastro-usuarios
+/SisandUserManagement
 │── backend/          # API .NET Core
 │── frontend/         # Aplicação Angular
 │── docker-compose.yml # Configuração do Docker
