@@ -9,7 +9,7 @@ import { NgxSpinnerService } from "ngx-spinner";
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
-  email = '';
+  username = '';
   password = '';
   errorMessage = '';
   loading = false;
@@ -31,13 +31,13 @@ export class LoginComponent {
     this.loading = true;
     this.spinner.show();
 
-    this.authService.login({ email: this.email, password: this.password }).subscribe({
+    this.authService.login({ username: this.username, password: this.password }).subscribe({
       next: (response) => {
         localStorage.setItem('token', response.token);
           
         this.userService.getProfile().subscribe({
           next: (profile) => {
-            localStorage.setItem('user', JSON.stringify(profile)); // Salvar usuário no localStorage
+            localStorage.setItem('user', JSON.stringify(profile));
 
             this.router.navigate(['/profile']).then(() => {
               this.spinner.hide();

@@ -13,7 +13,7 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router, private jwtHelper: JwtHelperService) {}
 
-  login(credentials: { email: string; password: string }): Observable<any> {
+  login(credentials: { username: string; password: string }): Observable<any> {
     console.log(environment.apiUrl);
     return this.http.post(`${this.apiUrl}/login`, credentials);
   }

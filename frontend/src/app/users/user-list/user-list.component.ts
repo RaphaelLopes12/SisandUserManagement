@@ -4,20 +4,20 @@ import { Router } from '@angular/router';
 import { UserService } from '../user.service';
 import { ToastService } from '../../shared/toast.service';
 import { DeleteConfirmationComponent } from 'src/app/shared/modal-delete/delete-confirmation.component';
+import { User } from '../models/user.model';
 
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
 })
 export class UserListComponent implements OnInit {
-  users: any[] = [];
-  filteredUsers: any[] = [];
-  paginatedUsers: any[] = [];
+  users: User[] = [];
   searchQuery: string = '';
   loading = true;
-  itemsPerPage: number = 5;
+  itemsPerPage: number = 10;
   currentPage: number = 1;
   totalItems: number = 0;
+  typingTimeout: any;
 
   constructor(
     private userService: UserService,
@@ -27,12 +27,28 @@ export class UserListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.userService.getUsers().subscribe({
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+    this.loading = true;
+    this.userService.getUsers(this.currentPage, this.itemsPerPage, this.searchQuery).subscribe({
       next: (data) => {
-        this.users = data;
-        this.filteredUsers = data;
-        this.totalItems = data.length;
-        this.updatePagination();
+        console.log('Dados recebidos do backend:', data);
+        this.users = data.users.map((user: any): User => ({
+          id: user.Id,
+          name: user.Name,
+          email: user.Email,
+          username: user.Username,
+          address: user.Address,
+          birthDate: user.BirthDate,
+          phoneNumber: user.PhoneNumber,
+          role: user.Role,
+          createdAt: user.CreatedAt,
+          updatedAt: user.UpdatedAt
+        }));
+        console.log('Usuários processados:', this.users);
+        this.totalItems = data.totalUsers;
         this.loading = false;
       },
       error: (err) => {
@@ -42,27 +58,19 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  filterUsers(): void {
-    this.filteredUsers = this.users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
-    this.totalItems = this.filteredUsers.length;
-    this.changePage(1);
-  }
-
-  updatePagination(): void {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    this.paginatedUsers = this.filteredUsers.slice(start, end);
-  }
-
   changePage(page: number): void {
     this.currentPage = page;
-    this.updatePagination();
+    this.loadUsers();
   }
-  
+
+  searchUsers(): void {
+    clearTimeout(this.typingTimeout);
+    this.typingTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.loadUsers();
+    }, 500);
+  }
+
   navigateToCreate(): void {
     this.router.navigate(['/users/new']);
   }
@@ -71,23 +79,23 @@ export class UserListComponent implements OnInit {
     this.router.navigate([`/users/edit/${userId}`]);
   }
 
-
-  openDeleteModal(user: any): void {
+  openDeleteModal(user: User): void {
     const modalRef = this.modalService.open(DeleteConfirmationComponent);
     modalRef.componentInstance.userName = user.name;
 
-    modalRef.result.then((result) => {
-      if (result) {
-        this.deleteUser(user.id);
-      }
-    }).catch(() => {});
+    modalRef.result
+      .then((result) => {
+        if (result) {
+          this.deleteUser(user.id);
+        }
+      })
+      .catch(() => {});
   }
 
   deleteUser(id: string): void {
     this.userService.deleteUser(id).subscribe({
       next: () => {
-        this.users = this.users.filter((user) => user.id !== id);
-        this.filterUsers();
+        this.loadUsers();
         this.toastService.success('Usuário excluído com sucesso!');
       },
       error: (err) => {

@@ -9,6 +9,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxSpinnerModule } from "ngx-spinner";
 import { ToastrModule } from 'ngx-toastr';
+import { NgbCalendar, NgbDatepickerModule, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { ToastrModule } from 'ngx-toastr';
     ReactiveFormsModule,
     NgbPaginationModule,
     NgbDropdownModule,
+    NgbDatepickerModule,
     UsersRoutingModule,
     BrowserAnimationsModule,
     NgxSpinnerModule,

@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../user.service';
 import { AuthService } from '../../auth/auth.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ToastService } from '../../shared/toast.service';
+import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-user-form',
@@ -15,6 +16,10 @@ export class UserFormComponent implements OnInit {
   isEditing = false;
   loading = false;
   hideNavbar = false;
+  roles = [
+    { value: 'Admin', label: 'Administrator' },
+    { value: 'User', label: 'Usuário' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -24,17 +29,26 @@ export class UserFormComponent implements OnInit {
     private router: Router,
     private toastService: ToastService
   ) {
-    this.userForm = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
-    });
+    this.userForm = this.fb.group(
+      {
+        name: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]],
+        username: ['', Validators.required],
+        address: ['', Validators.required],
+        birthDate: [null, Validators.required],
+        phoneNumber: ['', Validators.required],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        passwordConfirmation: ['', Validators.required],
+        role: ['User', Validators.required]
+      },
+      { validators: this.passwordsMatchValidator }
+    );
   }
 
-  ngOnInit(): void {  
+  ngOnInit(): void {
     this.userId = this.route.snapshot.paramMap.get('id');
     this.isEditing = !!this.userId;
-  
+
     this.route.queryParams.subscribe((params) => {
       this.hideNavbar = params['fromLogin'] === 'true';
     });
@@ -45,7 +59,12 @@ export class UserFormComponent implements OnInit {
         next: (user) => {
           this.userForm.patchValue({
             name: user.name,
-            email: user.email
+            email: user.email,
+            username: user.username,
+            address: user.address,
+            phoneNumber: user.phoneNumber,
+            role: user.role,
+            birthDate: this.convertDateToNgbFormat(user.birthDate)
           });
           this.loading = false;
         },
@@ -59,10 +78,13 @@ export class UserFormComponent implements OnInit {
 
   saveUser(): void {
     if (this.userForm.invalid) return;
-  
+
     const userData = this.userForm.value;
+
+    userData.birthDate = this.convertDateToISO(userData.birthDate);
+
     this.loading = true;
-  
+
     if (this.isEditing) {
       this.userService.updateUser(this.userId!, userData).subscribe({
         next: () => {
@@ -91,13 +113,19 @@ export class UserFormComponent implements OnInit {
       });
     }
   }
-  
+
+  private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
+    const password = group.get('password')?.value;
+    const passwordConfirmation = group.get('passwordConfirmation')?.value;
+    return password === passwordConfirmation ? null : { passwordsMismatch: true };
+  }
+
   private handleError(error: any): void {
     this.loading = false;
-  
+
     if (error.status === 400) {
       const validationErrors = error.error.errors;
-      
+
       if (validationErrors) {
         Object.values(validationErrors).forEach((messages: any) => {
           messages.forEach((msg: string) => this.toastService.error(msg));
@@ -105,14 +133,33 @@ export class UserFormComponent implements OnInit {
         return;
       }
     }
-  
+
     if (error.error?.message) {
       this.toastService.error(error.error.message);
       return;
     }
-  
+
     this.toastService.error('Ocorreu um erro ao processar sua solicitação.');
-  }  
+  }
+
+  convertDateToNgbFormat(dateString: string): NgbDateStruct {
+    if (!dateString) return { year: 2000, month: 1, day: 1 };
+    const date = new Date(dateString);
+    return {
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      day: date.getDate()
+    };
+  }
+
+  convertDateToISO(date: NgbDateStruct): string {
+    if (!date) return '';
+    return `${date.year}-${this.padNumber(date.month)}-${this.padNumber(date.day)}`;
+  }
+
+  padNumber(value: number): string {
+    return value < 10 ? `0${value}` : `${value}`;
+  }
 
   cancel(): void {
     this.router.navigate(['/users']);

@@ -18,12 +18,12 @@
         <div class="card-body">
           <form (ngSubmit)="login()">
             <div class="mb-3">
-              <label for="email" class="form-label">E-mail:</label>
+              <label for="username" class="form-label">Usuário:</label>
               <input
-                type="email"
-                id="email"
-                [(ngModel)]="email"
-                name="email"
+                type="username"
+                id="username"
+                [(ngModel)]="username"
+                name="username"
                 class="form-control"
                 required
               />
