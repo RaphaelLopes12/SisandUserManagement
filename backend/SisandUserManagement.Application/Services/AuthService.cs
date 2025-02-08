@@ -21,33 +21,30 @@ namespace SisandUserManagement.Application.Services
             _configuration = configuration;
         }
 
-        public async Task<User> RegisterAsync(string name, string email, string password, string role = "User")
+        public async Task<User> RegisterAsync(User user)
         {
-            var existingUser = await _userRepository.GetByEmailAsync(email);
+            var existingUser = await _userRepository.GetByEmailAsync(user.Email);
             if (existingUser != null)
             {
                 throw new InvalidOperationException("Este e-mail já está em uso.");
             }
 
-            var hashedPassword = BCryptNet.HashPassword(password);
-            var user = new User
+            var existingUsername = await _userRepository.GetByUsernameAsync(user.Username);
+            if (existingUsername != null)
             {
-                Id = Guid.NewGuid(),
-                Name = name,
-                Email = email,
-                PasswordHash = hashedPassword,
-                Role = role,
-                CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
-                TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time"))
-            };
+                throw new InvalidOperationException("Este nome de usuário já está em uso.");
+            }
+
+            user.CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time"));
 
             await _userRepository.AddAsync(user);
             return user;
         }
 
-        public async Task<string?> AuthenticateAsync(string email, string password)
+        public async Task<string?> AuthenticateAsync(string username, string password)
         {
-            var user = await _userRepository.GetByEmailAsync(email);
+            var user = await _userRepository.GetByUsernameAsync(username);
             if (user == null || !BCryptNet.Verify(password, user.PasswordHash))
                 return null;
 

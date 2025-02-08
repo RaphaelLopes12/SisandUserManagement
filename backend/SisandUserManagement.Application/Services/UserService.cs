@@ -26,20 +26,32 @@ public class UserService : IUserService
         return await _userRepository.GetAllAsync();
     }
 
+    public async Task<(List<Dictionary<string, object>>, int)> GetAllUsersPaginatedAsync(int page, int pageSize, List<string>? fields, string? filter)
+    {
+        return await _userRepository.GetAllPaginatedAsync(page, pageSize, fields, filter);
+    }
+
     public async Task<User?> GetUserByIdAsync(Guid id)
     {
         return await _userRepository.GetByIdAsync(id);
     }
 
-    public async Task<bool> UpdateUserAsync(Guid id, string name, string email)
+    public async Task<bool> UpdateUserAsync(Guid id, User updatedUser)
     {
-        var user = await _userRepository.GetByIdAsync(id);
-        if (user == null) return false;
+        var existingUser = await _userRepository.GetByIdAsync(id);
+        if (existingUser == null) return false;
 
-        user.Name = name;
-        user.Email = email;
+        existingUser.Name = updatedUser.Name;
+        existingUser.Email = updatedUser.Email;
+        existingUser.Username = updatedUser.Username;
+        existingUser.Address = updatedUser.Address;
+        existingUser.BirthDate = updatedUser.BirthDate;
+        existingUser.PhoneNumber = updatedUser.PhoneNumber;
+        existingUser.Role = updatedUser.Role;
+        existingUser.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+            TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time"));
 
-        await _userRepository.UpdateAsync(user);
+        await _userRepository.UpdateAsync(existingUser);
         return true;
     }
 

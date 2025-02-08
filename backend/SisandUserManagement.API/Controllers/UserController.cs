@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SisandUserManagement.API.DTOs;
 using SisandUserManagement.Application.Interfaces.Services;
+using SisandUserManagement.Domain.Entities;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 
@@ -13,10 +15,12 @@ namespace SisandUserManagement.API.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IMapper _mapper;
 
-    public UserController(IUserService userService)
+    public UserController(IUserService userService, IMapper mapper)
     {
         _userService = userService;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -49,11 +53,29 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>Retorna uma lista com todos os usuários.</returns>
     [HttpGet]
-    [SwaggerOperation(Summary = "Lista todos os usuários do sistema.")]
-    public async Task<IActionResult> GetAllUsers()
+    [SwaggerOperation(Summary = "Lista usuários com paginação e campos personalizados.")]
+    public async Task<IActionResult> GetAllUsers(
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 10, 
+        [FromQuery] string? fields = null, 
+        [FromQuery] string? filter = null)
     {
-        var users = await _userService.GetAllUsersAsync();
-        return Ok(users);
+        if (page < 1 || pageSize < 1)
+            return BadRequest("Página e tamanho da página devem ser maiores que 0.");
+
+        var selectedFields = fields?.Split(',').Select(f => f.Trim()).ToList();
+        var (users, totalUsers) = await _userService.GetAllUsersPaginatedAsync(page, pageSize, selectedFields, filter);
+
+        var totalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
+
+        return Ok(new
+        {
+            TotalUsers = totalUsers,
+            TotalPages = totalPages,
+            CurrentPage = page,
+            PageSize = pageSize,
+            Users = users
+        });
     }
 
     /// <summary>
@@ -82,9 +104,15 @@ public class UserController : ControllerBase
     [SwaggerOperation(Summary = "Atualiza os dados de um usuário.")]
     public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequestDto request)
     {
-        var success = await _userService.UpdateUserAsync(id, request.Name, request.Email);
+        var existingUser = await _userService.GetUserByIdAsync(id);
+        if (existingUser == null) return NotFound("Usuário não encontrado.");
+
+        var updatedUser = _mapper.Map<User>(request);
+
+        var success = await _userService.UpdateUserAsync(id, updatedUser);
+
         if (!success)
-            return NotFound("Usuário não encontrado.");
+            return BadRequest("Falha ao atualizar o usuário.");
 
         return NoContent();
     }

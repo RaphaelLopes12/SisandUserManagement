@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SisandUserManagement.API.Mapping;
 using SisandUserManagement.Application.Interfaces.Repositories;
 using SisandUserManagement.Application.Interfaces.Services;
 using SisandUserManagement.Application.Services;
@@ -18,6 +19,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddAutoMapper(typeof(UserProfile));
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -2,6 +2,8 @@
 using SisandUserManagement.API.DTOs;
 using SisandUserManagement.Application.Interfaces.Services;
 using Swashbuckle.AspNetCore.Annotations;
+using SisandUserManagement.Domain.Entities;
+using AutoMapper;
 
 namespace SisandUserManagement.API.Controllers;
 
@@ -13,10 +15,12 @@ namespace SisandUserManagement.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IMapper _mapper;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IMapper mapper)
     {
         _authService = authService;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -42,8 +46,21 @@ public class AuthController : ControllerBase
 
         try
         {
-            var user = await _authService.RegisterAsync(request.Name, request.Email, request.Password, request.Role);
-            return Ok(new { user.Id, user.Name, user.Email, user.Role });
+            var user = _mapper.Map<User>(request);
+
+            var createdUser = await _authService.RegisterAsync(user);
+
+            return Ok(new
+            {
+                createdUser.Id,
+                createdUser.Name,
+                createdUser.Email,
+                createdUser.Username,
+                createdUser.Role,
+                createdUser.Address,
+                createdUser.BirthDate,
+                createdUser.PhoneNumber
+            });
         }
         catch (InvalidOperationException ex)
         {
@@ -64,7 +81,7 @@ public class AuthController : ControllerBase
     [SwaggerResponse(401, "Credenciais inválidas.")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
-        var token = await _authService.AuthenticateAsync(request.Email, request.Password);
+        var token = await _authService.AuthenticateAsync(request.Username, request.Password);
         if (token == null)
             return Unauthorized();
 
