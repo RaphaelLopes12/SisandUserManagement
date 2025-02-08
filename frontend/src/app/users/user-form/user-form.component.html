@@ -46,6 +46,18 @@
             formControlName="username"
             placeholder="Digite o nome de usuário"
           />
+          <div
+            *ngIf="userForm.get('username')?.hasError('noSpacesAllowed')"
+            class="text-danger"
+          >
+            O nome de usuário não pode conter espaços.
+          </div>
+          <div
+            *ngIf="userForm.get('username')?.hasError('maxlength')"
+            class="text-danger"
+          >
+            O nome de usuário deve ter no máximo 50 caracteres.
+          </div>
         </div>
 
         <div class="mb-3">
@@ -119,45 +131,47 @@
           </select>
         </div>
 
-        <div class="mb-3">
-          <label for="password" class="form-label">Senha</label>
-          <input
-            type="password"
-            id="password"
-            class="form-control"
-            formControlName="password"
-            placeholder="Digite a senha"
-          />
-          <div
-            *ngIf="
-              userForm.get('password')?.invalid &&
-              userForm.get('password')?.touched
-            "
-            class="text-danger"
-          >
-            Senha é obrigatória e deve ter pelo menos 6 caracteres.
+        <div *ngIf="!isEditing">
+          <div class="mb-3">
+            <label for="password" class="form-label">Senha</label>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              formControlName="password"
+              placeholder="Digite a senha"
+            />
+            <div
+              *ngIf="
+                userForm.get('password')?.invalid &&
+                userForm.get('password')?.touched
+              "
+              class="text-danger"
+            >
+              Senha é obrigatória e deve ter pelo menos 6 caracteres.
+            </div>
           </div>
-        </div>
 
-        <div class="mb-3">
-          <label for="passwordConfirmation" class="form-label"
-            >Confirmar Senha</label
-          >
-          <input
-            type="password"
-            id="passwordConfirmation"
-            class="form-control"
-            formControlName="passwordConfirmation"
-            placeholder="Digite a senha novamente"
-          />
-          <div
-            *ngIf="
-              userForm.hasError('passwordsMismatch') &&
-              userForm.get('passwordConfirmation')?.touched
-            "
-            class="text-danger"
-          >
-            As senhas não coincidem.
+          <div class="mb-3">
+            <label for="passwordConfirmation" class="form-label"
+              >Confirmar Senha</label
+            >
+            <input
+              type="password"
+              id="passwordConfirmation"
+              class="form-control"
+              formControlName="passwordConfirmation"
+              placeholder="Digite a senha novamente"
+            />
+            <div
+              *ngIf="
+                userForm.hasError('passwordsMismatch') &&
+                userForm.get('passwordConfirmation')?.touched
+              "
+              class="text-danger"
+            >
+              As senhas não coincidem.
+            </div>
           </div>
         </div>
 

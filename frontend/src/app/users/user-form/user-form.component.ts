@@ -2,13 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../user.service';
 import { AuthService } from '../../auth/auth.service';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { ToastService } from '../../shared/toast.service';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-user-form',
-  templateUrl: './user-form.component.html'
+  templateUrl: './user-form.component.html',
 })
 export class UserFormComponent implements OnInit {
   userForm: FormGroup;
@@ -16,9 +22,11 @@ export class UserFormComponent implements OnInit {
   isEditing = false;
   loading = false;
   hideNavbar = false;
+  showPasswordFields = true;
+
   roles = [
     { value: 'Admin', label: 'Administrator' },
-    { value: 'User', label: 'Usuário' }
+    { value: 'User', label: 'Usuário' },
   ];
 
   constructor(
@@ -33,16 +41,38 @@ export class UserFormComponent implements OnInit {
       {
         name: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
-        username: ['', Validators.required],
+        username: [
+          '',
+          [
+            Validators.required,
+            Validators.maxLength(50),
+            this.noSpacesValidator,
+          ],
+        ],
         address: ['', Validators.required],
         birthDate: [null, Validators.required],
         phoneNumber: ['', Validators.required],
-        password: ['', [Validators.required, Validators.minLength(6)]],
-        passwordConfirmation: ['', Validators.required],
-        role: ['User', Validators.required]
+        password: ['', [Validators.minLength(6)]],
+        passwordConfirmation: [''],
+        role: ['User', Validators.required],
       },
       { validators: this.passwordsMatchValidator }
     );
+
+    this.userForm.get('username')?.valueChanges.subscribe((value) => {
+      if (value) {
+        this.userForm.patchValue(
+          {
+            username: value.trim().replace(/\s/g, ''),
+          },
+          { emitEvent: false }
+        );
+      }
+    });
+  }
+
+  noSpacesValidator(control: AbstractControl): ValidationErrors | null {
+    return /\s/.test(control.value) ? { noSpacesAllowed: true } : null;
   }
 
   ngOnInit(): void {
@@ -54,7 +84,9 @@ export class UserFormComponent implements OnInit {
     });
 
     if (this.isEditing) {
+      this.showPasswordFields = false;
       this.loading = true;
+
       this.userService.getUserById(this.userId!).subscribe({
         next: (user) => {
           this.userForm.patchValue({
@@ -64,14 +96,14 @@ export class UserFormComponent implements OnInit {
             address: user.address,
             phoneNumber: user.phoneNumber,
             role: user.role,
-            birthDate: this.convertDateToNgbFormat(user.birthDate)
+            birthDate: this.convertDateToNgbFormat(user.birthDate),
           });
           this.loading = false;
         },
         error: () => {
           this.toastService.error('Erro ao carregar usuário');
           this.loading = false;
-        }
+        },
       });
     }
   }
@@ -80,8 +112,12 @@ export class UserFormComponent implements OnInit {
     if (this.userForm.invalid) return;
 
     const userData = this.userForm.value;
-
     userData.birthDate = this.convertDateToISO(userData.birthDate);
+
+    if (this.isEditing && !userData.password) {
+      delete userData.password;
+      delete userData.passwordConfirmation;
+    }
 
     this.loading = true;
 
@@ -96,28 +132,34 @@ export class UserFormComponent implements OnInit {
         },
         complete: () => {
           this.loading = false;
-        }
+        },
       });
     } else {
       this.authService.register(userData).subscribe({
         next: () => {
           this.toastService.success('Usuário registrado com sucesso!');
-          this.router.navigate(['/login'], { queryParams: { fromRegister: 'true' } });
+          this.router.navigate(['/login'], {
+            queryParams: { fromRegister: 'true' },
+          });
         },
         error: (error) => {
           this.handleError(error);
         },
         complete: () => {
           this.loading = false;
-        }
+        },
       });
     }
   }
 
-  private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
+  private passwordsMatchValidator(
+    group: AbstractControl
+  ): ValidationErrors | null {
     const password = group.get('password')?.value;
     const passwordConfirmation = group.get('passwordConfirmation')?.value;
-    return password === passwordConfirmation ? null : { passwordsMismatch: true };
+    return password === passwordConfirmation
+      ? null
+      : { passwordsMismatch: true };
   }
 
   private handleError(error: any): void {
@@ -148,13 +190,15 @@ export class UserFormComponent implements OnInit {
     return {
       year: date.getFullYear(),
       month: date.getMonth() + 1,
-      day: date.getDate()
+      day: date.getDate(),
     };
   }
 
   convertDateToISO(date: NgbDateStruct): string {
     if (!date) return '';
-    return `${date.year}-${this.padNumber(date.month)}-${this.padNumber(date.day)}`;
+    return `${date.year}-${this.padNumber(date.month)}-${this.padNumber(
+      date.day
+    )}`;
   }
 
   padNumber(value: number): string {

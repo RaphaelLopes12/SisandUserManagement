@@ -18,6 +18,7 @@ export class UserListComponent implements OnInit {
   currentPage: number = 1;
   totalItems: number = 0;
   typingTimeout: any;
+  userRole: string | null = null;
 
   constructor(
     private userService: UserService,
@@ -27,14 +28,22 @@ export class UserListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.getUserRole();
     this.loadUsers();
+  }
+
+  getUserRole(): void {
+    const user = localStorage.getItem('user');
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      this.userRole = parsedUser.role;
+    }
   }
 
   loadUsers(): void {
     this.loading = true;
     this.userService.getUsers(this.currentPage, this.itemsPerPage, this.searchQuery).subscribe({
       next: (data) => {
-        console.log('Dados recebidos do backend:', data);
         this.users = data.users.map((user: any): User => ({
           id: user.Id,
           name: user.Name,
@@ -47,7 +56,6 @@ export class UserListComponent implements OnInit {
           createdAt: user.CreatedAt,
           updatedAt: user.UpdatedAt
         }));
-        console.log('Usuários processados:', this.users);
         this.totalItems = data.totalUsers;
         this.loading = false;
       },
@@ -72,24 +80,30 @@ export class UserListComponent implements OnInit {
   }
 
   navigateToCreate(): void {
-    this.router.navigate(['/users/new']);
+    if (this.userRole === 'Admin') {
+      this.router.navigate(['/users/new']);
+    }
   }
 
   navigateToEdit(userId: string): void {
-    this.router.navigate([`/users/edit/${userId}`]);
+    if (this.userRole === 'Admin') {
+      this.router.navigate([`/users/edit/${userId}`]);
+    }
   }
 
   openDeleteModal(user: User): void {
-    const modalRef = this.modalService.open(DeleteConfirmationComponent);
-    modalRef.componentInstance.userName = user.name;
+    if (this.userRole === 'Admin') {
+      const modalRef = this.modalService.open(DeleteConfirmationComponent);
+      modalRef.componentInstance.userName = user.name;
 
-    modalRef.result
-      .then((result) => {
-        if (result) {
-          this.deleteUser(user.id);
-        }
-      })
-      .catch(() => {});
+      modalRef.result
+        .then((result) => {
+          if (result) {
+            this.deleteUser(user.id);
+          }
+        })
+        .catch(() => {});
+    }
   }
 
   deleteUser(id: string): void {
