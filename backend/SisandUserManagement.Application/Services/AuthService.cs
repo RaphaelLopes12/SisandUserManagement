@@ -36,7 +36,9 @@ namespace SisandUserManagement.Application.Services
                 Name = name,
                 Email = email,
                 PasswordHash = hashedPassword,
-                Role = role
+                Role = role,
+                CreatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time"))
             };
 
             await _userRepository.AddAsync(user);
