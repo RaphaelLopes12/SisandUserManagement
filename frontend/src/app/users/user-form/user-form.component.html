@@ -20,7 +20,12 @@
     <div class="card-body">
       <form [formGroup]="userForm" (ngSubmit)="saveUser()">
         <div class="mb-3">
-          <label for="name" class="form-label">Nome</label>
+          <app-required-label
+            label="Nome"
+            for="name"
+            class="form-label"
+            [isRequired]="true"
+          ></app-required-label>
           <input
             type="text"
             id="name"
@@ -39,7 +44,11 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Nome de Usuário</label>
+          <app-required-label
+            label="Nome de Usuário"
+            class="form-label"
+            [isRequired]="true"
+          ></app-required-label>
           <input
             type="text"
             class="form-control"
@@ -61,7 +70,12 @@
         </div>
 
         <div class="mb-3">
-          <label for="email" class="form-label">E-mail</label>
+          <app-required-label
+            label="E-mail"
+            for="email"
+            class="form-label"
+            [isRequired]="true"
+          ></app-required-label>
           <input
             type="email"
             id="email"
@@ -90,7 +104,11 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Data de Nascimento</label>
+          <app-required-label
+            label="Data de Nascimento"
+            class="form-label"
+            [isRequired]="true"
+          ></app-required-label>
           <div class="input-group">
             <input
               class="form-control"
@@ -123,7 +141,11 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Perfil</label>
+          <app-required-label
+            label="Perfil"
+            class="form-label"
+            [isRequired]="true"
+          ></app-required-label>
           <select class="form-select" formControlName="role">
             <option *ngFor="let role of roles" [value]="role.value">
               {{ role.label }}
@@ -133,7 +155,12 @@
 
         <div *ngIf="!isEditing">
           <div class="mb-3">
-            <label for="password" class="form-label">Senha</label>
+            <app-required-label
+              label="Senha"
+              for="password"
+              class="form-label"
+              [isRequired]="true"
+            ></app-required-label>
             <input
               type="password"
               id="password"
@@ -153,9 +180,12 @@
           </div>
 
           <div class="mb-3">
-            <label for="passwordConfirmation" class="form-label"
-              >Confirmar Senha</label
-            >
+            <app-required-label
+              label="Confirmar Senha"
+              for="passwordConfirmation"
+              class="form-label"
+              [isRequired]="true"
+            ></app-required-label>
             <input
               type="password"
               id="passwordConfirmation"

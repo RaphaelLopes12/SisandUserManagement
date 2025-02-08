@@ -26,6 +26,7 @@
         <th class="w-10">#</th>
         <th class="w-25">Nome</th>
         <th class="w-35">E-mail</th>
+        <th class="w-15">Perfil</th>
         <th class="w-20">Data de Criação</th>
         <th class="w-10 text-center">Ações</th>
       </tr>
@@ -35,7 +36,8 @@
         <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
         <td>{{ user.name }}</td>
         <td>{{ user.email }}</td>
-        <td>{{ user.createdAt | date : "dd/MM/yyyy HH:mm" }}</td>
+        <td>{{ user.role === 'Admin' ? 'Administrador' : 'Usuário' }}</td>
+        <td>{{ user.createdAt | date: "dd/MM/yyyy" }}</td>
         <td class="text-center">
           <div ngbDropdown class="d-inline-block" *ngIf="userRole === 'Admin'">
             <button class="btn btn-secondary dropdown-toggle" id="dropdownMenu" ngbDropdownToggle>

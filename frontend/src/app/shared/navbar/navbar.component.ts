@@ -15,22 +15,16 @@ export class NavbarComponent implements OnInit {
     this.loadUser();
   }
 
-  /**
-   * Carrega os dados do usuário salvo no localStorage
-   */
   loadUser(): void {
     const storedUser = localStorage.getItem('user');
     this.user = storedUser ? JSON.parse(storedUser) : null;
   }
 
-  /**
-   * Realiza logout do usuário
-   */
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.router.navigate(['/login']).then(() => {
-      window.location.reload(); // Atualiza a página para garantir que os dados sumam
+      window.location.reload();
     });
   }
 }
