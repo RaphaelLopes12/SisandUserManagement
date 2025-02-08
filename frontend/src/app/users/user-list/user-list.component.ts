@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { UserService } from '../user.service';
 import { ToastService } from '../../shared/toast.service';
+import { DeleteConfirmationComponent } from 'src/app/shared/modal-delete/delete-confirmation.component';
 
 @Component({
   selector: 'app-user-list',
@@ -20,7 +22,8 @@ export class UserListComponent implements OnInit {
   constructor(
     private userService: UserService,
     private router: Router,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private modalService: NgbModal
   ) {}
 
   ngOnInit(): void {
@@ -68,19 +71,29 @@ export class UserListComponent implements OnInit {
     this.router.navigate([`/users/edit/${userId}`]);
   }
 
+
+  openDeleteModal(user: any): void {
+    const modalRef = this.modalService.open(DeleteConfirmationComponent);
+    modalRef.componentInstance.userName = user.name;
+
+    modalRef.result.then((result) => {
+      if (result) {
+        this.deleteUser(user.id);
+      }
+    }).catch(() => {});
+  }
+
   deleteUser(id: string): void {
-    if (confirm('Tem certeza que deseja excluir este usuário?')) {
-      this.userService.deleteUser(id).subscribe({
-        next: () => {
-          this.users = this.users.filter((user) => user.id !== id);
-          this.filterUsers();
-          this.toastService.success('Usuário excluído com sucesso!');
-        },
-        error: (err) => {
-          console.error('Erro ao excluir usuário:', err);
-          this.toastService.success('Usuário excluído com sucesso!');
-        },
-      });
-    }
+    this.userService.deleteUser(id).subscribe({
+      next: () => {
+        this.users = this.users.filter((user) => user.id !== id);
+        this.filterUsers();
+        this.toastService.success('Usuário excluído com sucesso!');
+      },
+      error: (err) => {
+        console.error('Erro ao excluir usuário:', err);
+        this.toastService.error('Erro ao excluir usuário.');
+      },
+    });
   }
 }
